@@ -1,18 +1,18 @@
-# Semester 3 DBMS Major Project - SpendWise Expense Tracker 💰
+# Semester 3 Major Project - SpendWise Expense Tracker 💰
 
 **Course**: B.Tech Computer Science Engineering  
-**Subject**: Database Management Systems (DBMS) & Backend Development  
-**Project Folder**: [`DBMS main project`](file:///Users/ninadnileshdeodhare/Desktop/Semester%203%20Sprint%201/DBMS/DBMS%20main%20project)
+**Subject**: Backend Development & Database Management Systems (DBMS)  
+**Project Folder**: [`Backend main project`](file:///Users/ninadnileshdeodhare/Desktop/Semester%203%20Sprint%201/DBMS/Backend%20main%20project)
 
 ---
 
 ## 📌 Quick Summary
-This repository contains the complete DBMS Major Project **"SpendWise"**, a personal finance tracking system built with Node.js, Express.js, MongoDB (Mongoose ODM), Socket.io WebSockets, Firebase Admin SDK, and a clean Web Dashboard interface.
+This repository contains the complete Major Project **"SpendWise"**, a personal finance tracking system built with Node.js, Express.js, MongoDB (Mongoose ODM), Socket.io WebSockets, Firebase Admin SDK, and a clean Web Dashboard interface.
 
 ### 🚀 How to Run the Project
 ```bash
-# Navigate to the DBMS main project folder
-cd "DBMS main project"
+# Navigate to the Backend main project folder
+cd "Backend main project"
 
 # Install dependencies
 npm install
@@ -29,7 +29,7 @@ npm start
 ---
 
 ## 📁 Folder Structure
-- `DBMS main project/`
+- `Backend main project/`
   - `config/` - MongoDB & Firebase connection initialization
   - `controllers/` - Auth, Transaction, Budget, Category, Report, Notification controllers
   - `models/` - Mongoose schemas for User, Transaction, Budget, Category
