@@ -90,9 +90,16 @@ async function handleLogin(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    const data = await res.json();
+    
+    let data;
+    try {
+      data = await res.json();
+    } catch (parseErr) {
+      alert('Server returned unexpected non-JSON response. Please try again.');
+      return;
+    }
 
-    if (data.success) {
+    if (data && data.success) {
       token = data.data.token;
       currentUser = data.data;
       localStorage.setItem('spendwise_token', token);
@@ -104,7 +111,7 @@ async function handleLogin(e) {
       alert(data.message || 'Login failed');
     }
   } catch (err) {
-    alert('Server connection error');
+    alert('Server connection error: ' + err.message);
   }
 }
 

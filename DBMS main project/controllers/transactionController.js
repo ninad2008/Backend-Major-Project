@@ -1,19 +1,23 @@
 const Transaction = require('../models/Transaction');
 const Budget = require('../models/Budget');
+const mongoose = require('mongoose');
 const { emitBudgetAlert } = require('../utils/socket');
+
+// In-memory transactions fallback for cloud demo mode
+const inMemoryTransactions = [];
 
 // Helper to calculate total spent for a user in a specific month & category
 const updateBudgetSpent = async (userId, category, dateStr) => {
+  if (mongoose.connection.readyState !== 1) return;
+
   const dateObj = new Date(dateStr);
   const year = dateObj.getFullYear();
   const monthNum = String(dateObj.getMonth() + 1).padStart(2, '0');
   const monthFormat = `${year}-${monthNum}`;
 
-  // Find active budget for this user, category, and month
   const budget = await Budget.findOne({ user: userId, category, month: monthFormat });
   if (!budget) return;
 
-  // Calculate sum of expenses for this category in this month
   const startOfMonth = new Date(year, dateObj.getMonth(), 1);
   const endOfMonth = new Date(year, dateObj.getMonth() + 1, 0, 23, 59, 59);
 
@@ -38,7 +42,6 @@ const updateBudgetSpent = async (userId, category, dateStr) => {
   budget.spent = spentAmount;
   await budget.save();
 
-  // Socket.io Real-time alert if spent > limit
   if (spentAmount > budget.limit) {
     emitBudgetAlert(userId, {
       budgetId: budget._id,
@@ -59,26 +62,45 @@ const createTransaction = async (req, res) => {
   try {
     const { title, amount, type, category, date, notes } = req.body;
 
-    const transaction = await Transaction.create({
-      user: req.user._id,
-      title,
-      amount,
-      type: type || 'expense',
-      category,
-      date: date || Date.now(),
-      notes
-    });
+    if (mongoose.connection.readyState === 1) {
+      const transaction = await Transaction.create({
+        user: req.user._id,
+        title,
+        amount,
+        type: type || 'expense',
+        category,
+        date: date || Date.now(),
+        notes
+      });
 
-    // If it's an expense, sync with budget and check real-time Socket.io limits
-    if (transaction.type === 'expense') {
-      await updateBudgetSpent(req.user._id, transaction.category, transaction.date);
+      if (transaction.type === 'expense') {
+        await updateBudgetSpent(req.user._id, transaction.category, transaction.date);
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'Transaction recorded successfully',
+        data: transaction
+      });
+    } else {
+      // In-memory fallback
+      const tx = {
+        _id: 'tx_' + Date.now(),
+        user: req.user._id,
+        title,
+        amount: parseFloat(amount),
+        type: type || 'expense',
+        category,
+        date: date || new Date().toISOString(),
+        notes
+      };
+      inMemoryTransactions.unshift(tx);
+      return res.status(201).json({
+        success: true,
+        message: 'Transaction recorded (Cloud Demo Mode)',
+        data: tx
+      });
     }
-
-    res.status(201).json({
-      success: true,
-      message: 'Transaction recorded successfully',
-      data: transaction
-    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -89,37 +111,49 @@ const createTransaction = async (req, res) => {
 // @access  Private
 const getTransactions = async (req, res) => {
   try {
-    const { type, category, startDate, endDate, limit, page } = req.query;
+    if (mongoose.connection.readyState === 1) {
+      const { type, category, startDate, endDate, limit, page } = req.query;
+      let query = { user: req.user._id };
 
-    let query = { user: req.user._id };
+      if (type) query.type = type;
+      if (category) query.category = category;
+      if (startDate || endDate) {
+        query.date = {};
+        if (startDate) query.date.$gte = new Date(startDate);
+        if (endDate) query.date.$lte = new Date(endDate);
+      }
 
-    if (type) query.type = type;
-    if (category) query.category = category;
-    if (startDate || endDate) {
-      query.date = {};
-      if (startDate) query.date.$gte = new Date(startDate);
-      if (endDate) query.date.$lte = new Date(endDate);
+      const pageNum = parseInt(page, 10) || 1;
+      const limitNum = parseInt(limit, 10) || 20;
+      const skip = (pageNum - 1) * limitNum;
+
+      const transactions = await Transaction.find(query)
+        .sort({ date: -1 })
+        .skip(skip)
+        .limit(limitNum);
+
+      const total = await Transaction.countDocuments(query);
+
+      return res.status(200).json({
+        success: true,
+        count: transactions.length,
+        total,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
+        data: transactions
+      });
+    } else {
+      // In-memory fallback
+      const userTxs = inMemoryTransactions.filter(t => t.user === req.user._id);
+      return res.status(200).json({
+        success: true,
+        count: userTxs.length,
+        total: userTxs.length,
+        page: 1,
+        pages: 1,
+        data: userTxs
+      });
     }
-
-    const pageNum = parseInt(page, 10) || 1;
-    const limitNum = parseInt(limit, 10) || 20;
-    const skip = (pageNum - 1) * limitNum;
-
-    const transactions = await Transaction.find(query)
-      .sort({ date: -1 })
-      .skip(skip)
-      .limit(limitNum);
-
-    const total = await Transaction.countDocuments(query);
-
-    res.status(200).json({
-      success: true,
-      count: transactions.length,
-      total,
-      page: pageNum,
-      pages: Math.ceil(total / limitNum),
-      data: transactions
-    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -130,11 +164,15 @@ const getTransactions = async (req, res) => {
 // @access  Private
 const getTransactionById = async (req, res) => {
   try {
-    const transaction = await Transaction.findOne({ _id: req.params.id, user: req.user._id });
-    if (!transaction) {
-      return res.status(404).json({ success: false, message: 'Transaction not found' });
+    if (mongoose.connection.readyState === 1) {
+      const transaction = await Transaction.findOne({ _id: req.params.id, user: req.user._id });
+      if (!transaction) return res.status(404).json({ success: false, message: 'Transaction not found' });
+      return res.status(200).json({ success: true, data: transaction });
+    } else {
+      const tx = inMemoryTransactions.find(t => t._id === req.params.id);
+      if (!tx) return res.status(404).json({ success: false, message: 'Transaction not found' });
+      return res.status(200).json({ success: true, data: tx });
     }
-    res.status(200).json({ success: true, data: transaction });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -145,27 +183,32 @@ const getTransactionById = async (req, res) => {
 // @access  Private
 const updateTransaction = async (req, res) => {
   try {
-    let transaction = await Transaction.findOne({ _id: req.params.id, user: req.user._id });
-    if (!transaction) {
-      return res.status(404).json({ success: false, message: 'Transaction not found' });
-    }
+    if (mongoose.connection.readyState === 1) {
+      let transaction = await Transaction.findOne({ _id: req.params.id, user: req.user._id });
+      if (!transaction) return res.status(404).json({ success: false, message: 'Transaction not found' });
 
-    const oldCategory = transaction.category;
-    const oldDate = transaction.date;
+      const oldCategory = transaction.category;
+      const oldDate = transaction.date;
 
-    transaction = await Transaction.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
+      transaction = await Transaction.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true
+      });
 
-    if (transaction.type === 'expense') {
-      await updateBudgetSpent(req.user._id, transaction.category, transaction.date);
-      if (oldCategory !== transaction.category) {
-        await updateBudgetSpent(req.user._id, oldCategory, oldDate);
+      if (transaction.type === 'expense') {
+        await updateBudgetSpent(req.user._id, transaction.category, transaction.date);
+        if (oldCategory !== transaction.category) {
+          await updateBudgetSpent(req.user._id, oldCategory, oldDate);
+        }
       }
-    }
 
-    res.status(200).json({ success: true, message: 'Transaction updated successfully', data: transaction });
+      return res.status(200).json({ success: true, message: 'Transaction updated successfully', data: transaction });
+    } else {
+      const idx = inMemoryTransactions.findIndex(t => t._id === req.params.id);
+      if (idx === -1) return res.status(404).json({ success: false, message: 'Transaction not found' });
+      inMemoryTransactions[idx] = { ...inMemoryTransactions[idx], ...req.body };
+      return res.status(200).json({ success: true, message: 'Transaction updated', data: inMemoryTransactions[idx] });
+    }
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -176,20 +219,23 @@ const updateTransaction = async (req, res) => {
 // @access  Private
 const deleteTransaction = async (req, res) => {
   try {
-    const transaction = await Transaction.findOne({ _id: req.params.id, user: req.user._id });
-    if (!transaction) {
-      return res.status(404).json({ success: false, message: 'Transaction not found' });
+    if (mongoose.connection.readyState === 1) {
+      const transaction = await Transaction.findOne({ _id: req.params.id, user: req.user._id });
+      if (!transaction) return res.status(404).json({ success: false, message: 'Transaction not found' });
+
+      const { category, date, type } = transaction;
+      await transaction.deleteOne();
+
+      if (type === 'expense') {
+        await updateBudgetSpent(req.user._id, category, date);
+      }
+
+      return res.status(200).json({ success: true, message: 'Transaction deleted successfully' });
+    } else {
+      const idx = inMemoryTransactions.findIndex(t => t._id === req.params.id);
+      if (idx !== -1) inMemoryTransactions.splice(idx, 1);
+      return res.status(200).json({ success: true, message: 'Transaction deleted' });
     }
-
-    const { category, date, type } = transaction;
-
-    await transaction.deleteOne();
-
-    if (type === 'expense') {
-      await updateBudgetSpent(req.user._id, category, date);
-    }
-
-    res.status(200).json({ success: true, message: 'Transaction deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
