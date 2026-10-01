@@ -47,23 +47,31 @@ function switchAuthTab(tab) {
 function initSocketConnection() {
   if (typeof io !== 'undefined') {
     socket = io();
-    
+
     socket.on('connect', () => {
-      console.log('Socket.io connected:', socket.id);
+      console.log('Socket.io connected successfully:', socket.id);
       if (currentUser && currentUser._id) {
-        socket.emit('join_user_room', currentUser._id);
+        socket.emit('join_user_room', currentUser._id.toString());
       }
     });
 
-    // Listen for budget limit exceeded alerts
+    // Listen for real-time budget threshold alerts
     socket.on('budget_alert', (data) => {
-      triggerAlertBanner(data.message);
-      loadBudgets(); // Refresh budget progress bars
+      console.log('Real-time budget alert received:', data);
+      if (data.isExceeded || data.overspentBy > 0) {
+        triggerAlertBanner(data.message);
+      }
+      loadBudgets(); // Refresh progress bars immediately
+      loadSummaryReport();
     });
 
     socket.on('global_budget_alert', (data) => {
-      triggerAlertBanner(data.message);
+      console.log('Global budget alert:', data);
+      if (data.isExceeded || data.overspentBy > 0) {
+        triggerAlertBanner(data.message);
+      }
       loadBudgets();
+      loadSummaryReport();
     });
   }
 }
@@ -90,12 +98,12 @@ async function handleLogin(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    
+
     let data;
     try {
       data = await res.json();
     } catch (parseErr) {
-      alert('Server returned unexpected non-JSON response. Please try again.');
+      alert('Server returned invalid response');
       return;
     }
 
@@ -195,7 +203,7 @@ async function loadTransactions() {
           <td>${tx.title}</td>
           <td>${tx.category}</td>
           <td style="color: ${tx.type === 'expense' ? '#e74c3c' : '#27ae60'}; font-weight: 600;">
-            ${tx.type === 'expense' ? '-' : '+'}$${tx.amount.toFixed(2)}
+            ${tx.type === 'expense' ? '-' : '+'}$${parseFloat(tx.amount).toFixed(2)}
           </td>
           <td><button onclick="deleteTx('${tx._id}')" style="color: red; border:none; background:none; cursor:pointer;">Delete</button></td>
         </tr>
@@ -266,16 +274,18 @@ async function loadBudgets() {
       }
 
       container.innerHTML = data.data.map(bg => {
-        const percent = Math.min(Math.round((bg.spent / bg.limit) * 100), 100);
+        const spentVal = parseFloat(bg.spent || 0);
+        const limitVal = parseFloat(bg.limit || 1);
+        const percent = Math.min(Math.round((spentVal / limitVal) * 100), 100);
         let colorClass = '';
-        if (bg.spent > bg.limit) colorClass = 'danger';
-        else if (percent > 80) colorClass = 'warning';
+        if (spentVal > limitVal) colorClass = 'danger';
+        else if (percent >= 75) colorClass = 'warning';
 
         return `
           <div class="budget-item">
             <div class="budget-header">
               <span>${bg.category}</span>
-              <span>$${bg.spent.toFixed(2)} / $${bg.limit.toFixed(2)}</span>
+              <span>$${spentVal.toFixed(2)} / $${limitVal.toFixed(2)} (${percent}%)</span>
             </div>
             <div class="progress-bar-bg">
               <div class="progress-bar-fill ${colorClass}" style="width: ${percent}%;"></div>
@@ -293,7 +303,7 @@ async function handleSetBudget(e) {
   e.preventDefault();
   const category = document.getElementById('bgCategory').value;
   const limit = parseFloat(document.getElementById('bgLimit').value);
-  const month = new Date().toISOString().slice(0, 7); // Format: YYYY-MM
+  const month = new Date().toISOString().slice(0, 7);
 
   try {
     const res = await fetch('/api/budgets', {
@@ -328,7 +338,7 @@ async function loadForecast() {
       container.innerHTML = data.forecast.map(item => `
         <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
           <span>${item.category}:</span>
-          <strong>~$${item.monthlyAverageForecast.toFixed(2)} / mo</strong>
+          <strong>~$${parseFloat(item.monthlyAverageForecast).toFixed(2)} / mo</strong>
         </div>
       `).join('');
     }

@@ -12,10 +12,11 @@ const initSocket = (server) => {
   io.on('connection', (socket) => {
     console.log(`[Socket.io] Client connected: ${socket.id}`);
 
-    // Allow user to join a channel with their userId
     socket.on('join_user_room', (userId) => {
-      socket.join(userId);
-      console.log(`[Socket.io] Socket ${socket.id} joined room: user_${userId}`);
+      if (userId) {
+        socket.join(userId.toString());
+        console.log(`[Socket.io] Socket ${socket.id} joined user room: ${userId.toString()}`);
+      }
     });
 
     socket.on('disconnect', () => {
@@ -36,10 +37,13 @@ const getIO = () => {
 // Utility function to trigger budget alerts
 const emitBudgetAlert = (userId, data) => {
   if (io) {
-    io.to(userId.toString()).emit('budget_alert', data);
+    const targetRoom = userId ? userId.toString() : null;
+    if (targetRoom) {
+      io.to(targetRoom).emit('budget_alert', data);
+    }
     // Also emit broadcast alert for simple listening
     io.emit('global_budget_alert', data);
-    console.log(`[Socket.io Alert Sent] User ${userId}: Budget for ${data.category} exceeded (${data.spent}/${data.limit})`);
+    console.log(`[Socket.io Alert Sent] User ${userId}: Budget for ${data.category} spent $${data.spent} / limit $${data.limit}`);
   }
 };
 
