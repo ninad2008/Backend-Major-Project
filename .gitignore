@@ -1,0 +1,4 @@
+DBMS main project/node_modules/
+DBMS main project/firebase-service-account.json
+.DS_Store
+*.log
