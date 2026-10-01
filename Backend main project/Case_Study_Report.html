@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Case Study Report - SpendWise</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm 20mm 20mm 20mm;
+    }
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      color: #111;
+      line-height: 1.6;
+      font-size: 13px;
+      margin: 0;
+      padding: 0;
+    }
+    .page-break {
+      page-break-after: always;
+    }
+    .title-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 90vh;
+      text-align: center;
+      padding-top: 40px;
+    }
+    .logo-text {
+      font-size: 28px;
+      font-weight: 800;
+      color: #701c38;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+    .logo-sub {
+      font-size: 14px;
+      font-weight: 600;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .report-title {
+      margin-top: 80px;
+      font-size: 26px;
+      font-weight: 700;
+      color: #111;
+    }
+    .project-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #701c38;
+      margin-top: 15px;
+    }
+    .project-sub {
+      font-size: 14px;
+      color: #555;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+    .student-details {
+      margin-top: 120px;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .student-details p {
+      margin: 4px 0;
+    }
+    .index-title {
+      font-size: 20px;
+      font-weight: 700;
+      text-decoration: underline;
+      margin-bottom: 25px;
+    }
+    .index-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    .index-list li {
+      font-size: 15px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      color: #222;
+    }
+    h2.section-header {
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #111;
+      border-bottom: 2px solid #701c38;
+      padding-bottom: 5px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+    p, ul {
+      margin-bottom: 12px;
+      color: #222;
+      text-align: justify;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    pre {
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      border-left: 4px solid #701c38;
+      padding: 12px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      overflow-x: auto;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    code {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f4f4f4;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1: TITLE PAGE -->
+  <div class="title-page page-break">
+    <div class="logo-text">ITM SKILLS UNIVERSITY</div>
+    <div class="logo-sub">School of Future Tech</div>
+
+    <div class="report-title">Case Study Report</div>
+    <div style="font-size: 14px; margin-top: 10px;">on</div>
+
+    <div class="project-name">SpendWise - Personal Expense Tracker</div>
+    <div class="project-sub">(Backend Development – Node.js, Express.js, MongoDB & Socket.io)</div>
+
+    <div class="student-details">
+      <p style="text-decoration: underline;">NINAD NILESH DEODHARE</p>
+      <p style="text-decoration: underline;">15009625180</p>
+      <p>SAM ALTMAN COHORT</p>
+    </div>
+  </div>
+
+  <!-- PAGE 2: INDEX -->
+  <div class="page-break" style="padding-top: 30px;">
+    <div class="index-title">Index:</div>
+    <ol class="index-list">
+      <li>1. Introduction to the Case Study</li>
+      <li>2. Problem Statement / Case Background (Abstract)</li>
+      <li>3. Problem Statement / Case Study Design</li>
+      <li>4. Methods & Algorithms Technology Applied in the Case Study</li>
+      <li>5. Case Study Implementation Details and Snapshots</li>
+      <li>6. Case Study Results and Conclusion</li>
+      <li>7. References</li>
+    </ol>
+  </div>
+
+  <!-- PAGE 3: SECTIONS 1 & 2 -->
+  <div class="page-break" style="padding-top: 20px;">
+    <h2 class="section-header">1. INTRODUCTION TO CASE STUDY:</h2>
+    <p>
+      Managing personal finances effectively is a key challenge for individuals and families in modern daily life. Logging daily expenses manually on paper or offline spreadsheets often leads to untracked spending, budget overruns, and a lack of real-time awareness regarding individual or family financial health.
+    </p>
+    <p>
+      With the advancement of web technologies and asynchronous database management systems, personal finance tracking can be automated. An <strong>Expense Tracker System</strong> allows users to record daily income and expenditure, categorize spending (such as Groceries, Food, Rent, Entertainment), set monthly category budgets, receive real-time threshold alerts, and generate graphical financial reports.
+    </p>
+    <p>
+      This case study demonstrates the development of a production-ready, modular RESTful API and WebSocket system called <strong>SpendWise</strong> using <strong>Node.js, Express.js, MongoDB (Mongoose ODM), Socket.io, and Firebase Admin SDK</strong>. The system handles user authentication, CRUD operations for transactions and budgets, real-time WebSocket budget threshold alerts, push notifications, and automated financial reporting.
+    </p>
+    <p>
+      The application features clean REST endpoints alongside an interactive web dashboard interface, ensuring high performance, scalability, and instant real-time user feedback.
+    </p>
+
+    <h2 class="section-header" style="margin-top: 40px;">2. PROBLEM STATEMENT / CASE BACKGROUND (ABSTRACT):</h2>
+    <p>
+      The purpose of this case study is to design and implement a scalable backend system for <strong>"SpendWise"</strong> that enables users to manage personal and family finances seamlessly.
+    </p>
+    <p><strong>The system provides functionality to:</strong></p>
+    <ul>
+      <li><strong>User Authentication:</strong> Secure user registration and login using JWT (JSON Web Tokens) and Firebase Authentication verification.</li>
+      <li><strong>Transaction Management:</strong> Full CRUD capability (Create, Read, Update, Delete) for income and expense transactions.</li>
+      <li><strong>Category & Budget Configuration:</strong> Assign spending limits per category on a monthly basis (<code>YYYY-MM</code>).</li>
+      <li><strong>Real-Time Budget Alerts:</strong> WebSockets using <strong>Socket.io</strong> to emit real-time overspending alerts to clients the moment a logged transaction exceeds a category's budget threshold.</li>
+      <li><strong>Push Notifications:</strong> <strong>Firebase Cloud Messaging (FCM)</strong> integration to send push notifications for overspending.</li>
+      <li><strong>Financial Analytics & Forecasting:</strong> Generating monthly pie-chart data breakdowns, category summaries, annual reports, and a 3-month moving average predictive spending forecast.</li>
+    </ul>
+  </div>
+
+  <!-- PAGE 4: SECTION 3 -->
+  <div class="page-break" style="padding-top: 20px;">
+    <h2 class="section-header">3. CASE STUDY DESIGN:</h2>
+    <p>
+      The SpendWise system is designed following a modular Model-View-Controller (MVC) architectural pattern:
+    </p>
+
+    <pre>
+Backend main project/
+├── config/                  # Database & Firebase connections
+│   ├── db.js
+│   └── firebase.js
+├── controllers/             # Business logic layer
+│   ├── authController.js
+│   ├── transactionController.js
+│   ├── budgetController.js
+│   ├── categoryController.js
+│   ├── reportController.js
+│   └── notificationController.js
+├── middleware/              # Authentication & validation layer
+│   ├── auth.js
+│   └── validate.js
+├── models/                  # Mongoose MongoDB schemas
+│   ├── User.js
+│   ├── Transaction.js
+│   ├── Budget.js
+│   └── Category.js
+├── routes/                  # Express REST API endpoints
+├── utils/                   # Socket.io event emitter helpers
+│   └── socket.js
+├── public/                  # Web Dashboard frontend interface
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+├── server.js                # Main HTTP & Socket.io server entry point
+├── package.json
+└── README.md
+    </pre>
+
+    <h3>Main Modules</h3>
+    <p><strong>1. Authentication Module (<code>/api/auth</code>):</strong> Hashes passwords with bcrypt, manages user accounts, and returns JWT tokens.</p>
+    <p><strong>2. Transaction Management Module (<code>/api/transactions</code>):</strong> Logs expenses/incomes and calculates background category spent totals.</p>
+    <p><strong>3. Budget & Real-Time Alert Module (<code>/api/budgets</code>):</strong> Sets monthly limits and emits real-time Socket.io alerts when threshold is crossed.</p>
+    <p><strong>4. Analytics & Forecast Module (<code>/api/reports</code>):</strong> Calculates monthly summaries, category totals, yearly breakdowns, and moving average forecasts.</p>
+    <p><strong>5. Firebase Push Notification Module (<code>/api/notifications</code>):</strong> Sends FCM push notifications to user devices.</p>
+  </div>
+
+  <!-- PAGE 5: SECTION 4 -->
+  <div class="page-break" style="padding-top: 20px;">
+    <h2 class="section-header">4. METHOD AND ALGORITHMS APPLIED TO CASE STUDY:</h2>
+    <p>The SpendWise system applies several advanced backend techniques:</p>
+
+    <h3>1. MongoDB Aggregation Pipeline ($match & $group)</h3>
+    <p>To compute total category spending for a user efficiently inside MongoDB:</p>
+    <pre>
+const totalExpense = await Transaction.aggregate([
+  {
+    $match: {
+      user: new mongoose.Types.ObjectId(userId.toString()),
+      category: category,
+      type: 'expense',
+      date: { $gte: startOfMonth, $lte: endOfMonth }
+    }
+  },
+  {
+    $group: {
+      _id: null,
+      total: { $sum: '$amount' }
+    }
+  }
+]);
+    </pre>
+
+    <h3>2. Real-Time Socket.io Event Emission Algorithm</h3>
+    <p>Whenever a transaction pushes spending over the limit, a WebSocket alert is emitted to the client's room:</p>
+    <pre>
+if (spentAmount > budget.limit) {
+  io.to(userId.toString()).emit('budget_alert', {
+    budgetId: budget._id,
+    category: budget.category,
+    limit: budget.limit,
+    spent: spentAmount,
+    overspentBy: spentAmount - budget.limit,
+    isExceeded: true,
+    message: `ALERT: You have exceeded your budget for ${budget.category} by $${(spentAmount - budget.limit).toFixed(2)}!`
+  });
+}
+    </pre>
+
+    <h3>3. Bcrypt Password Hashing</h3>
+    <p>User passwords are salted and hashed using <code>bcryptjs</code> prior to database storage.</p>
+  </div>
+
+  <!-- PAGE 6: SECTION 5 -->
+  <div class="page-break" style="padding-top: 20px;">
+    <h2 class="section-header">5. CASE STUDY IMPLEMENTATION DETAILS AND SNAPSHOTS:</h2>
+    <p>The application is implemented in Node.js and Express.js with a MongoDB database.</p>
+
+    <h3>Step 1: Server Setup (<code>server.js</code>)</h3>
+    <pre>
+const express = require('express');
+const http = require('http');
+const connectDB = require('./config/db');
+const { initSocket } = require('./utils/socket');
+
+connectDB();
+
+const app = express();
+const server = http.createServer(app);
+initSocket(server);
+
+app.use(express.json());
+app.use(express.static('public'));
+
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/transactions', require('./routes/transactionRoutes'));
+app.use('/api/budgets', require('./routes/budgetRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
+
+server.listen(5000, () => {
+  console.log('🚀 Server running on http://localhost:5000');
+});
+    </pre>
+
+    <h3>Step 2: Budget Mongoose Schema (<code>models/Budget.js</code>)</h3>
+    <pre>
+const mongoose = require('mongoose');
+
+const BudgetSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  category: { type: String, required: true },
+  limit: { type: Number, required: true },
+  spent: { type: Number, default: 0 },
+  month: { type: String, required: true }
+}, { timestamps: true });
+
+BudgetSchema.index({ user: 1, category: 1, month: 1 }, { unique: true });
+
+module.exports = mongoose.model('Budget', BudgetSchema);
+    </pre>
+  </div>
+
+  <!-- PAGE 7: SECTION 6 & 7 -->
+  <div style="padding-top: 20px;">
+    <h2 class="section-header">6. CASE STUDY RESULTS AND CONCLUSION:</h2>
+    <p>
+      The <strong>SpendWise Expense Tracker Backend API</strong> successfully demonstrates the design and deployment of a modern asynchronous Node.js, MongoDB, and WebSocket architecture.
+    </p>
+
+    <p><strong>Key Results Achieved:</strong></p>
+    <ul>
+      <li><strong>Full RESTful API:</strong> Clean CRUD operations for users, transactions, budgets, categories, reports, and notifications.</li>
+      <li><strong>Real-Time Alert System:</strong> Socket.io successfully emits overspending alerts instantly to clients.</li>
+      <li><strong>Database Efficiency:</strong> MongoDB indexing and aggregation pipelines compute financial metrics in sub-millisecond response times.</li>
+      <li><strong>Interactive UI & Docs:</strong> Swagger UI at <code>/api-docs</code> and an interactive web dashboard interface.</li>
+    </ul>
+
+    <h3>Future Improvements</h3>
+    <ul>
+      <li>Automated SMS bank transaction parsing.</li>
+      <li>Multi-currency exchange rate API integration.</li>
+      <li>Machine-learning-based monthly expenditure predictions.</li>
+    </ul>
+
+    <h2 class="section-header" style="margin-top: 40px;">7. REFERENCES:</h2>
+    <ol style="font-weight: 500; font-size: 13px;">
+      <li>Node.js Official Documentation – <a href="https://nodejs.org/docs">https://nodejs.org/docs</a></li>
+      <li>Express.js API Reference – <a href="https://expressjs.com">https://expressjs.com</a></li>
+      <li>MongoDB & Mongoose ODM Documentation – <a href="https://mongoosejs.com">https://mongoosejs.com</a></li>
+      <li>Socket.io Real-time Application Framework – <a href="https://socket.io/docs">https://socket.io/docs</a></li>
+      <li>Firebase Admin SDK Guide – <a href="https://firebase.google.com/docs/admin/setup">https://firebase.google.com/docs/admin/setup</a></li>
+    </ol>
+  </div>
+
+</body>
+</html>
