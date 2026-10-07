@@ -25,7 +25,7 @@ npm start
 - **Web Dashboard**: [http://localhost:5000](http://localhost:5000)
 - **Interactive Swagger Docs**: [http://localhost:5000/api-docs](http://localhost:5000/api-docs)
 - **MongoDB Connection**: `mongodb://localhost:27017/spendwise`
-- **Deployment Link: https://backend-major-project-n8pq.onrender.com
+- Deployment Link: https://backend-major-project-n8pq.onrender.com
 
 ---
 
